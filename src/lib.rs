@@ -1,3 +1,16 @@
+//! ## shared-file: adapters for concurrent File reads.
+//!
+//! **This crate is still under development.**
+//!
+//! Rust's [`Read`] trait requires exclusive (`&mut`) access, which
+//! can be a pain. This crate implements `SharedFile`, which allows
+//! concurrent readers to coexist.
+//!
+
+#![warn(missing_docs)]
+#![forbid(unsafe_code)]
+#![warn(clippy::cast_possible_truncation)]
+
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
@@ -43,6 +56,7 @@ impl<F> SharedFile<F>
 where
     F: Clone + Deref<Target = File>,
 {
+    /// Create a new `SharedFile`.
     pub fn new(file: F) -> Self {
         Self {
             file,
@@ -55,6 +69,9 @@ where
 }
 
 impl SharedArcFile {
+    /// Create a new `SharedFile`, which automatically maintains the lifetime
+    /// of the open `File` using a reference counter.
+    ///
     pub fn new_owned(file: File) -> Self {
         Self {
             file: Arc::new(file),
